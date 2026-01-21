@@ -366,9 +366,6 @@ class ICP(BaseModel):
     location_locality: list[str] | None = Field(
         None, description="Person's city"
     )
-    location_metro: list[str] | None = Field(
-        None, description="Person's metro area"
-    )
 
     # === Current Job Title Fields (job_title*) ===
     job_title: list[str] | None = Field(
@@ -524,9 +521,6 @@ class ICP(BaseModel):
     job_company_location_locality: list[str] | None = Field(
         None, description="Company HQ city"
     )
-    job_company_location_metro: list[str] | None = Field(
-        None, description="Company HQ metro area"
-    )
 
     # === Person Skills ===
     skills: list[str] | None = Field(
@@ -540,7 +534,6 @@ class ICP(BaseModel):
                 "location_country": ["united states"],
                 "location_region": ["california"],
                 "location_locality": ["san francisco"],
-                "location_metro": ["san francisco, california"],
                 # Job Title
                 "job_title": ["software engineer"],
                 "job_title_role": ["engineering"],
@@ -557,7 +550,6 @@ class ICP(BaseModel):
                 "job_company_location_country": ["united states"],
                 "job_company_location_region": ["california"],
                 "job_company_location_locality": ["san francisco"],
-                "job_company_location_metro": ["san francisco, california"],
                 # Skills
                 "skills": ["python", "machine learning"],
             }

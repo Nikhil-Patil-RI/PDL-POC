@@ -44,7 +44,6 @@ class PDLQueryBuilder:
         self._add_in_condition("location_country", self.icp.location_country)
         self._add_in_condition("location_region", self.icp.location_region)
         self._add_in_condition("location_locality", self.icp.location_locality)
-        self._add_in_condition("location_metro", self.icp.location_metro)
 
     def _add_job_title_conditions(self) -> None:
         """Add job title filter conditions."""
@@ -67,7 +66,6 @@ class PDLQueryBuilder:
         self._add_in_condition("job_company_location_country", self.icp.job_company_location_country)
         self._add_in_condition("job_company_location_region", self.icp.job_company_location_region)
         self._add_in_condition("job_company_location_locality", self.icp.job_company_location_locality)
-        self._add_in_condition("job_company_location_metro", self.icp.job_company_location_metro)
 
     def _add_skills_conditions(self) -> None:
         """Add person skills filter conditions."""

@@ -66,7 +66,6 @@ class CompanySearchSchema(BaseModel):
                 "location_country_not_in": ["china", "russia"],
                 "location_region": ["california"],
                 "location_locality": ["san francisco"],
-                "location_metro": ["san francisco bay area"],
                 "location_continent": ["north america"],
                 # Tags
                 "tags": ["saas", "b2b"],
@@ -138,9 +137,6 @@ class CompanySearchSchema(BaseModel):
     )
     location_locality: list[str] | None = Field(
         default=None, description="Company HQ city"
-    )
-    location_metro: list[str] | None = Field(
-        default=None, description="Company HQ metro area"
     )
     location_continent: list[str] | None = Field(
         default=None, description="Company HQ continent"

@@ -52,8 +52,6 @@ def build_company_query(criteria: CompanySearchSchema) -> str:
         _add_in_condition(conditions, "location.region", criteria.location_region)
     if criteria.location_locality:
         _add_in_condition(conditions, "location.locality", criteria.location_locality)
-    if criteria.location_metro:
-        _add_in_condition(conditions, "location.metro", criteria.location_metro)
     if criteria.location_continent:
         _add_in_condition(conditions, "location.continent", criteria.location_continent)
 
