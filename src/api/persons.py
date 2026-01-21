@@ -1,9 +1,9 @@
 """
-Prospects API endpoints for PDL-POC.
+Persons API endpoints for PDL-POC.
 
 Provides endpoints for:
-- preview_prospects: Search prospects using PDL Person Search API
-- generate_prospects: Enrich prospects using PDL Person Enrichment API
+- search_persons: Search persons using PDL Person Search API
+- enrich_persons: Enrich persons using PDL Person Enrichment API
 """
 
 import json
@@ -13,11 +13,11 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from src.schema.prospects import (
-    GenerateProspectsRequest,
-    GenerateProspectsResponse,
-    PreviewProspectsRequest,
-    PreviewProspectsResponse,
+from src.schema.persons import (
+    EnrichPersonsRequest,
+    EnrichPersonsResponse,
+    SearchPersonsRequest,
+    SearchPersonsResponse,
 )
 from src.utils.pdl_client import get_pdl_client
 from src.utils.query_builder import build_pdl_query
@@ -25,78 +25,78 @@ from src.utils.query_builder import build_pdl_query
 router = APIRouter()
 
 
-@router.post("/preview_prospects", response_model=PreviewProspectsResponse)
-async def preview_prospects(request: PreviewProspectsRequest) -> PreviewProspectsResponse:
+@router.post("/search_persons", response_model=SearchPersonsResponse)
+async def search_persons(request: SearchPersonsRequest) -> SearchPersonsResponse:
     """
-    Preview prospects using PDL Person Search API.
-    
-    This endpoint searches for prospects matching the ICP criteria
+    Search persons using PDL Person Search API.
+
+    This endpoint searches for persons matching the ICP criteria
     without consuming enrichment credits.
     """
     try:
         # Build SQL query from ICP
         sql_query = build_pdl_query(request.icp)
-        
+
         # Get PDL client
         client = get_pdl_client()
-        
+
         # Execute search
         response = client.person_search(
             sql_query=sql_query,
-            size=request.number_of_prospects,
+            size=request.number_of_persons,
         )
-        
+
         # Check for errors
         if response.get("status") != 200:
-            return PreviewProspectsResponse(
+            return SearchPersonsResponse(
                 success=False,
                 status_code=response.get("status", 500),
                 message=response.get("error", {}).get("message", "PDL search failed"),
-                prospects_found=0,
-                prospects_requested=request.number_of_prospects,
-                prospects=[],
+                persons_found=0,
+                persons_requested=request.number_of_persons,
+                persons=[],
                 icp=request.icp.model_dump(),
             )
-        
+
         # Return PDL data directly
-        prospects = response.get("data", [])
-        
-        return PreviewProspectsResponse(
+        persons = response.get("data", [])
+
+        return SearchPersonsResponse(
             success=True,
             status_code=200,
-            message="Prospects retrieved successfully",
-            prospects_found=response.get("total", len(prospects)),
-            prospects_requested=request.number_of_prospects,
-            prospects=prospects,
+            message="Persons retrieved successfully",
+            persons_found=response.get("total", len(persons)),
+            persons_requested=request.number_of_persons,
+            persons=persons,
             icp=request.icp.model_dump(),
             scroll_token=response.get("scroll_token"),
         )
-        
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
-@router.post("/generate_prospects", response_model=GenerateProspectsResponse)
-async def generate_prospects(request: GenerateProspectsRequest) -> GenerateProspectsResponse:
+@router.post("/enrich_persons", response_model=EnrichPersonsResponse)
+async def enrich_persons(request: EnrichPersonsRequest) -> EnrichPersonsResponse:
     """
-    Generate and enrich prospects using PDL Person Enrichment API.
-    
-    This endpoint first searches for prospects, then enriches them
+    Enrich persons using PDL Person Enrichment API.
+
+    This endpoint first searches for persons, then enriches them
     and exports results to a JSON file.
     """
     try:
         client = get_pdl_client()
-        enriched_prospects: list[dict[str, Any]] = []
-        
-        # If prospect_ids provided, enrich directly
-        if request.prospect_ids:
-            for pdl_id in request.prospect_ids[:request.number_of_prospects]:
+        enriched_persons: list[dict[str, Any]] = []
+
+        # If person_ids provided, enrich directly
+        if request.person_ids:
+            for pdl_id in request.person_ids[:request.number_of_persons]:
                 try:
                     result = client.person_enrichment(pdl_id=pdl_id)
                     if result.get("status") == 200:
-                        enriched_prospects.append(result.get("data", {}))
+                        enriched_persons.append(result.get("data", {}))
                 except Exception:
                     continue
         else:
@@ -104,18 +104,17 @@ async def generate_prospects(request: GenerateProspectsRequest) -> GenerateProsp
             sql_query = build_pdl_query(request.icp)
             search_response = client.person_search(
                 sql_query=sql_query,
-                size=request.number_of_prospects,
+                size=request.number_of_persons,
             )
 
             if search_response.get("status") != 200:
-                return GenerateProspectsResponse(
+                return EnrichPersonsResponse(
                     success=False,
                     status_code=search_response.get("status", 500),
                     message="PDL search failed",
-                    prospects_generated=0,
-                    prospects_requested=request.number_of_prospects,
-                    prospects_enriched=0,
-                    prospects=None,
+                    persons_enriched=0,
+                    persons_requested=request.number_of_persons,
+                    persons=None,
                 )
 
             # Extract PDL IDs from search results
@@ -130,36 +129,35 @@ async def generate_prospects(request: GenerateProspectsRequest) -> GenerateProsp
                 # Extract enriched data from bulk response (list of results)
                 for item in bulk_response:
                     if item.get("status") == 200 and item.get("data"):
-                        enriched_prospects.append(item.get("data"))
-        
+                        enriched_persons.append(item.get("data"))
+
         # Export to JSON file
-        export_file = _export_prospects_to_json(enriched_prospects)
-        
-        return GenerateProspectsResponse(
+        export_file = _export_persons_to_json(enriched_persons)
+
+        return EnrichPersonsResponse(
             success=True,
             status_code=200,
-            message="Prospects generated successfully",
-            prospects_generated=len(enriched_prospects),
-            prospects_requested=request.number_of_prospects,
-            prospects_enriched=len(enriched_prospects),
-            prospects=enriched_prospects,
+            message="Persons enriched successfully",
+            persons_enriched=len(enriched_persons),
+            persons_requested=request.number_of_persons,
+            persons=enriched_persons,
             export_file=export_file,
         )
-        
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
-def _export_prospects_to_json(
-    prospects: list[dict[str, Any]],
+def _export_persons_to_json(
+    persons: list[dict[str, Any]],
 ) -> str:
     """
-    Export prospects to a JSON file with timestamp.
+    Export persons to a JSON file with timestamp.
 
     Args:
-        prospects: List of prospect data to export.
+        persons: List of person data to export.
 
     Returns:
         Path to the exported JSON file.
@@ -170,17 +168,18 @@ def _export_prospects_to_json(
 
     # Generate filename with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"prospects_{timestamp}.json"
+    filename = f"persons_{timestamp}.json"
     filepath = os.path.join(exports_dir, filename)
 
     # Export data
     export_data = {
         "generated_at": datetime.now().isoformat(),
-        "total_prospects": len(prospects),
-        "prospects": prospects,
+        "total_persons": len(persons),
+        "persons": persons,
     }
 
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(export_data, f, indent=2, ensure_ascii=False)
 
     return filepath
+
