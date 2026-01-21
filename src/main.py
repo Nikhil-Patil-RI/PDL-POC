@@ -22,6 +22,7 @@ logging.basicConfig(
 load_dotenv()
 
 # Import routers
+from src.api.companies import router as companies_router
 from src.api.prospects import router as prospects_router
 
 
@@ -53,6 +54,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(prospects_router, prefix="/api/v1", tags=["prospects"])
+app.include_router(companies_router)
 
 
 @app.get("/health")

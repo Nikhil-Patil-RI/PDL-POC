@@ -154,6 +154,124 @@ class PDLClient:
         response = self.client.person.bulk(**params)
         return response.json()
 
+    def company_search(
+        self,
+        sql_query: str,
+        size: int = 25,
+        scroll_token: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Search for companies using SQL query.
+
+        Args:
+            sql_query: SQL query string for PDL company search.
+            size: Number of results per page (max 100).
+            scroll_token: Token for pagination.
+
+        Returns:
+            dict with status, data, total, scroll_token, etc.
+        """
+        params = {
+            "sql": sql_query,
+            "size": min(size, 100),
+            "pretty": True,
+        }
+
+        if scroll_token:
+            params["scroll_token"] = scroll_token
+
+        response = self.client.company.search(**params)
+        return response.json()
+
+    def company_enrichment(
+        self,
+        pdl_id: str | None = None,
+        name: str | None = None,
+        website: str | None = None,
+        profile: str | None = None,
+        ticker: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Enrich a company's data using PDL Company Enrichment API.
+
+        Args:
+            pdl_id: PDL company ID for direct lookup.
+            name: Company name.
+            website: Company website domain.
+            profile: Company social profile URL (e.g., linkedin.com/company/google).
+            ticker: Stock ticker symbol (for public companies).
+
+        Returns:
+            dict with status and enriched company data.
+        """
+        params: dict[str, Any] = {
+            "pretty": True,
+        }
+
+        if pdl_id:
+            params["pdl_id"] = pdl_id
+        if name:
+            params["name"] = name
+        if website:
+            params["website"] = website
+        if profile:
+            params["profile"] = profile
+        if ticker:
+            params["ticker"] = ticker
+
+        # Ensure at least one identifier is provided
+        if not any([pdl_id, name, website, profile, ticker]):
+            raise ValueError(
+                "At least one identifier is required: pdl_id, name, website, profile, or ticker"
+            )
+
+        response = self.client.company.enrichment(**params)
+        return response.json()
+
+    def company_bulk_enrichment(
+        self,
+        pdl_ids: list[str],
+    ) -> list[dict[str, Any]]:
+        """
+        Bulk enrich multiple companies by PDL ID.
+
+        Request format per PDL docs:
+        {
+            "requests": [
+                {"params": {"pdl_id": "..."}},
+                {"params": {"pdl_id": "..."}}
+            ]
+        }
+
+        Response format per PDL docs:
+        [
+            {"status": 200, "likelihood": 10, "data": {...}},
+            {"status": 200, "likelihood": 10, "data": {...}}
+        ]
+
+        Args:
+            pdl_ids: List of PDL company IDs to enrich.
+
+        Returns:
+            List of enrichment results with status and data.
+        """
+        # Build requests in PDL's expected format: [{"params": {...}}, ...]
+        bulk_requests = [{"params": {"pdl_id": pdl_id}} for pdl_id in pdl_ids]
+
+        params = {
+            "requests": bulk_requests,
+            "pretty": True,
+        }
+
+        response = self.client.company.bulk(**params)
+        result = response.json()
+
+        # Log the response for debugging
+        print(f"[DEBUG] Bulk enrichment response type: {type(result)}")
+        print(f"[DEBUG] Bulk enrichment response: {result}")
+
+        return result
+
 
 # Singleton instance
 _pdl_client: PDLClient | None = None
