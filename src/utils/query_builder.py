@@ -41,6 +41,8 @@ class PDLQueryBuilder:
 
     def _add_person_location_conditions(self) -> None:
         """Add person location filter conditions."""
+        self._add_like_condition("location_name", self.icp.location_name)
+        self._add_not_like_condition("location_name", self.icp.location_name_not_in)
         self._add_in_condition("location_country", self.icp.location_country)
         self._add_in_condition("location_region", self.icp.location_region)
         self._add_in_condition("location_locality", self.icp.location_locality)
@@ -62,7 +64,8 @@ class PDLQueryBuilder:
 
     def _add_company_location_conditions(self) -> None:
         """Add company HQ location filter conditions."""
-        self._add_in_condition("job_company_location_name", self.icp.job_company_location_name)
+        self._add_like_condition("job_company_location_name", self.icp.job_company_location_name)
+        self._add_not_like_condition("job_company_location_name", self.icp.job_company_location_name_not_in)
         self._add_in_condition("job_company_location_country", self.icp.job_company_location_country)
         self._add_in_condition("job_company_location_region", self.icp.job_company_location_region)
         self._add_in_condition("job_company_location_locality", self.icp.job_company_location_locality)
@@ -82,6 +85,27 @@ class PDLQueryBuilder:
             preserve_case = field in self.PRESERVE_CASE_FIELDS
             formatted = self._format_list_values(values, preserve_case=preserve_case)
             self.conditions.append(f"{field} IN {formatted}")
+
+    def _add_like_condition(self, field: str, values: list[str] | None) -> None:
+        """Add LIKE conditions with wildcards for partial matching."""
+        if not values:
+            return
+        escaped_values = [v.lower().replace("'", "''") for v in values]
+
+        if len(escaped_values) == 1:
+            self.conditions.append(f"{field} LIKE '%{escaped_values[0]}%'")
+        else:
+            like_conditions = [f"{field} LIKE '%{v}%'" for v in escaped_values]
+            self.conditions.append(f"({' OR '.join(like_conditions)})")
+
+    def _add_not_like_condition(self, field: str, values: list[str] | None) -> None:
+        """Add NOT LIKE conditions with wildcards for exclusion."""
+        if not values:
+            return
+        escaped_values = [v.lower().replace("'", "''") for v in values]
+
+        for v in escaped_values:
+            self.conditions.append(f"{field} NOT LIKE '%{v}%'")
 
     def _add_range_condition(self, field: str, min_val: int | None, max_val: int | None) -> None:
         """Add range condition for a field."""

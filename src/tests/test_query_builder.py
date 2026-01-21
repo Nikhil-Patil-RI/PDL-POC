@@ -84,10 +84,10 @@ class TestPDLQueryBuilder:
         assert "job_company_size IN ('51-200', '201-500')" in query
 
     def test_job_company_location_name_filter(self):
-        """Test company HQ location name filter."""
+        """Test company HQ location name filter uses LIKE for partial matching."""
         icp = ICP(job_company_location_name=["san francisco, california, united states"])
         query = build_pdl_query(icp)
-        assert "job_company_location_name IN ('san francisco, california, united states')" in query
+        assert "job_company_location_name LIKE '%san francisco, california, united states%'" in query
 
     def test_job_company_location_country_filter(self):
         """Test company HQ country filter."""

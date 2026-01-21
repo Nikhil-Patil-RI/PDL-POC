@@ -357,6 +357,12 @@ class ICP(BaseModel):
     """
 
     # === Person Location Fields (location_*) ===
+    location_name: list[str] | None = Field(
+        None, description="Person's location name (uses LIKE for partial matching)"
+    )
+    location_name_not_in: list[str] | None = Field(
+        None, description="Exclude persons in these locations (uses NOT LIKE)"
+    )
     location_country: list[str] | None = Field(
         None, description="Person's country"
     )
@@ -510,7 +516,10 @@ class ICP(BaseModel):
 
     # === Company Location Fields (job_company_location_*) ===
     job_company_location_name: list[str] | None = Field(
-        None, description="Company HQ location name"
+        None, description="Company HQ location name (uses LIKE for partial matching)"
+    )
+    job_company_location_name_not_in: list[str] | None = Field(
+        None, description="Exclude companies in these locations (uses NOT LIKE)"
     )
     job_company_location_country: list[str] | None = Field(
         None, description="Company HQ country"
@@ -531,6 +540,8 @@ class ICP(BaseModel):
         json_schema_extra={
             "example": {
                 # Person Location
+                "location_name": ["san francisco, california"],
+                "location_name_not_in": ["new york"],
                 "location_country": ["united states"],
                 "location_region": ["california"],
                 "location_locality": ["san francisco"],
@@ -547,6 +558,7 @@ class ICP(BaseModel):
                 "job_company_inferred_revenue": ["$10M-$25M", "$25M-$50M"],
                 # Company Location
                 "job_company_location_name": ["san francisco, california, united states"],
+                "job_company_location_name_not_in": ["new york"],
                 "job_company_location_country": ["united states"],
                 "job_company_location_region": ["california"],
                 "job_company_location_locality": ["san francisco"],
