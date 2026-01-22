@@ -363,20 +363,12 @@ class ICP(BaseModel):
     location_name_not_in: list[str] | None = Field(
         None, description="Exclude persons in these locations (uses NOT LIKE)"
     )
-    location_country: list[str] | None = Field(
-        None, description="Person's country"
-    )
-    location_region: list[str] | None = Field(
-        None, description="Person's state/region"
-    )
-    location_locality: list[str] | None = Field(
-        None, description="Person's city"
-    )
+    location_country: list[str] | None = Field(None, description="Person's country")
+    location_region: list[str] | None = Field(None, description="Person's state/region")
+    location_locality: list[str] | None = Field(None, description="Person's city")
 
     # === Current Job Title Fields (job_title*) ===
-    job_title: list[str] | None = Field(
-        None, description="Person's job title"
-    )
+    job_title: list[str] | None = Field(None, description="Person's job title")
     job_title_role: list[str] | None = Field(
         None,
         description="Job title role. Valid values: engineering, sales, marketing, finance, etc.",
@@ -407,7 +399,9 @@ class ICP(BaseModel):
         """Validate job title sub-role values are from the canonical PDL list."""
         if v is None:
             return v
-        invalid_values = [val for val in v if val.lower() not in VALID_JOB_TITLE_SUB_ROLES]
+        invalid_values = [
+            val for val in v if val.lower() not in VALID_JOB_TITLE_SUB_ROLES
+        ]
         if invalid_values:
             raise ValueError(
                 f"Invalid job_title_sub_role value(s): {invalid_values}. "
@@ -445,7 +439,9 @@ class ICP(BaseModel):
         """Validate job title class values are from the canonical PDL list."""
         if v is None:
             return v
-        invalid_values = [val for val in v if val.lower() not in VALID_JOB_TITLE_CLASSES]
+        invalid_values = [
+            val for val in v if val.lower() not in VALID_JOB_TITLE_CLASSES
+        ]
         if invalid_values:
             raise ValueError(
                 f"Invalid job_title_class value(s): {invalid_values}. "
@@ -492,6 +488,7 @@ class ICP(BaseModel):
                 f"Valid values are: {VALID_COMPANY_SIZES}"
             )
         return v
+
     job_company_type: list[str] | None = Field(
         None, description="Company type: public, private, nonprofit, etc."
     )
@@ -531,10 +528,12 @@ class ICP(BaseModel):
         None, description="Company HQ city"
     )
 
-    # === Person Skills ===
-    skills: list[str] | None = Field(
-        None, description="Person's skills"
+    job_company_location_postal_code: list[str] | None = Field(
+        None, description="Company HQ postal code"
     )
+
+    # === Person Skills ===
+    skills: list[str] | None = Field(None, description="Person's skills")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -557,11 +556,14 @@ class ICP(BaseModel):
                 "job_company_type": ["private"],
                 "job_company_inferred_revenue": ["$10M-$25M", "$25M-$50M"],
                 # Company Location
-                "job_company_location_name": ["san francisco, california, united states"],
+                "job_company_location_name": [
+                    "san francisco, california, united states"
+                ],
                 "job_company_location_name_not_in": ["new york"],
                 "job_company_location_country": ["united states"],
                 "job_company_location_region": ["california"],
                 "job_company_location_locality": ["san francisco"],
+                "job_company_location_postal_code": ["94101"],
                 # Skills
                 "skills": ["python", "machine learning"],
             }

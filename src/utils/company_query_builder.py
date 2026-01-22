@@ -43,17 +43,25 @@ def build_company_query(criteria: CompanySearchSchema) -> str:
     if criteria.location_name:
         _add_like_condition(conditions, "location.name", criteria.location_name)
     if criteria.location_name_not_in:
-        _add_not_like_condition(conditions, "location.name", criteria.location_name_not_in)
+        _add_not_like_condition(
+            conditions, "location.name", criteria.location_name_not_in
+        )
     if criteria.location_country:
         _add_in_condition(conditions, "location.country", criteria.location_country)
     if criteria.location_country_not_in:
-        _add_not_in_condition(conditions, "location.country", criteria.location_country_not_in)
+        _add_not_in_condition(
+            conditions, "location.country", criteria.location_country_not_in
+        )
     if criteria.location_region:
         _add_in_condition(conditions, "location.region", criteria.location_region)
     if criteria.location_locality:
         _add_in_condition(conditions, "location.locality", criteria.location_locality)
     if criteria.location_continent:
         _add_in_condition(conditions, "location.continent", criteria.location_continent)
+    if criteria.location_postal_code:
+        _add_in_condition(
+            conditions, "location.postal_code", criteria.location_postal_code
+        )
 
     # Tags filter
     if criteria.tags:
@@ -69,9 +77,13 @@ def build_company_query(criteria: CompanySearchSchema) -> str:
 
     # Funding filters
     if criteria.total_funding_raised_min:
-        conditions.append(f"total_funding_raised >= {criteria.total_funding_raised_min}")
+        conditions.append(
+            f"total_funding_raised >= {criteria.total_funding_raised_min}"
+        )
     if criteria.total_funding_raised_max:
-        conditions.append(f"total_funding_raised <= {criteria.total_funding_raised_max}")
+        conditions.append(
+            f"total_funding_raised <= {criteria.total_funding_raised_max}"
+        )
 
     # Industry classification codes
     if criteria.naics_code:

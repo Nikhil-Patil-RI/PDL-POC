@@ -75,7 +75,10 @@ class TestPDLQueryBuilder:
         """Test company industry filter."""
         icp = ICP(job_company_industry=["computer software", "hospital & health care"])
         query = build_pdl_query(icp)
-        assert "job_company_industry IN ('computer software', 'hospital & health care')" in query
+        assert (
+            "job_company_industry IN ('computer software', 'hospital & health care')"
+            in query
+        )
 
     def test_job_company_size_filter(self):
         """Test company size filter."""
@@ -85,9 +88,14 @@ class TestPDLQueryBuilder:
 
     def test_job_company_location_name_filter(self):
         """Test company HQ location name filter uses LIKE for partial matching."""
-        icp = ICP(job_company_location_name=["san francisco, california, united states"])
+        icp = ICP(
+            job_company_location_name=["san francisco, california, united states"]
+        )
         query = build_pdl_query(icp)
-        assert "job_company_location_name LIKE '%san francisco, california, united states%'" in query
+        assert (
+            "job_company_location_name LIKE '%san francisco, california, united states%'"
+            in query
+        )
 
     def test_job_company_location_country_filter(self):
         """Test company HQ country filter."""
@@ -128,4 +136,3 @@ class TestPDLQueryBuilder:
         icp = ICP(location_country=["United States", "CANADA"])
         query = build_pdl_query(icp)
         assert "('united states', 'canada')" in query
-

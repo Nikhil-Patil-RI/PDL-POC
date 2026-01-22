@@ -42,6 +42,7 @@ VALID_INFERRED_REVENUE: set[str] = {
     "$10b+",
 }
 
+
 class CompanySearchSchema(BaseModel):
     """Schema for company search criteria based on PDL Company Schema."""
 
@@ -112,16 +113,13 @@ class CompanySearchSchema(BaseModel):
     founded: int | None = Field(
         default=None, description="Year the company was founded"
     )
-    founded_min: int | None = Field(
-        default=None, description="Minimum founding year"
-    )
-    founded_max: int | None = Field(
-        default=None, description="Maximum founding year"
-    )
+    founded_min: int | None = Field(default=None, description="Minimum founding year")
+    founded_max: int | None = Field(default=None, description="Maximum founding year")
 
     # Location fields
     location_name: list[str] | None = Field(
-        default=None, description="Full location string (e.g., 'san francisco, california, united states')"
+        default=None,
+        description="Full location string (e.g., 'san francisco, california, united states')",
     )
     location_name_not_in: list[str] | None = Field(
         default=None, description="Exclude companies in these locations"
@@ -141,6 +139,9 @@ class CompanySearchSchema(BaseModel):
     location_continent: list[str] | None = Field(
         default=None, description="Company HQ continent"
     )
+    location_postal_code: list[str] | None = Field(
+        default=None, description="Company HQ postal code"
+    )
 
     # Tags/Keywords
     tags: list[str] | None = Field(
@@ -148,9 +149,7 @@ class CompanySearchSchema(BaseModel):
     )
 
     # Employee count range
-    employee_count: int | None = Field(
-        default=None, description="Exact employee count"
-    )
+    employee_count: int | None = Field(default=None, description="Exact employee count")
     employee_count_min: int | None = Field(
         default=None, description="Minimum employee count"
     )
@@ -170,9 +169,7 @@ class CompanySearchSchema(BaseModel):
     naics_code: list[str] | None = Field(
         default=None, description="NAICS industry codes"
     )
-    sic_code: list[str] | None = Field(
-        default=None, description="SIC industry codes"
-    )
+    sic_code: list[str] | None = Field(default=None, description="SIC industry codes")
 
     @field_validator("size", mode="before")
     @classmethod

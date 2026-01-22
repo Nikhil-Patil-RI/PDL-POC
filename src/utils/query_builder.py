@@ -60,15 +60,31 @@ class PDLQueryBuilder:
         self._add_in_condition("job_company_industry", self.icp.job_company_industry)
         self._add_in_condition("job_company_size", self.icp.job_company_size)
         self._add_in_condition("job_company_type", self.icp.job_company_type)
-        self._add_in_condition("job_company_inferred_revenue", self.icp.job_company_inferred_revenue)
+        self._add_in_condition(
+            "job_company_inferred_revenue", self.icp.job_company_inferred_revenue
+        )
 
     def _add_company_location_conditions(self) -> None:
         """Add company HQ location filter conditions."""
-        self._add_like_condition("job_company_location_name", self.icp.job_company_location_name)
-        self._add_not_like_condition("job_company_location_name", self.icp.job_company_location_name_not_in)
-        self._add_in_condition("job_company_location_country", self.icp.job_company_location_country)
-        self._add_in_condition("job_company_location_region", self.icp.job_company_location_region)
-        self._add_in_condition("job_company_location_locality", self.icp.job_company_location_locality)
+        self._add_like_condition(
+            "job_company_location_name", self.icp.job_company_location_name
+        )
+        self._add_not_like_condition(
+            "job_company_location_name", self.icp.job_company_location_name_not_in
+        )
+        self._add_in_condition(
+            "job_company_location_country", self.icp.job_company_location_country
+        )
+        self._add_in_condition(
+            "job_company_location_region", self.icp.job_company_location_region
+        )
+        self._add_in_condition(
+            "job_company_location_locality", self.icp.job_company_location_locality
+        )
+        self._add_in_condition(
+            "job_company_location_postal_code",
+            self.icp.job_company_location_postal_code,
+        )
 
     def _add_skills_conditions(self) -> None:
         """Add person skills filter conditions."""
@@ -107,7 +123,9 @@ class PDLQueryBuilder:
         for v in escaped_values:
             self.conditions.append(f"{field} NOT LIKE '%{v}%'")
 
-    def _add_range_condition(self, field: str, min_val: int | None, max_val: int | None) -> None:
+    def _add_range_condition(
+        self, field: str, min_val: int | None, max_val: int | None
+    ) -> None:
         """Add range condition for a field."""
         if min_val is not None:
             self.conditions.append(f"{field} >= {min_val}")
@@ -130,4 +148,3 @@ def build_pdl_query(icp: ICP) -> str:
     query = builder.build()
     print(f"PDL SQL Query: {query}")
     return query
-
